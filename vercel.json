@@ -1,4 +1,7 @@
 {
+  "buildCommand": "",
+  "outputDirectory": ".",
+  "framework": null,
   "headers": [
     {
       "source": "/Build/(.*)",
@@ -39,12 +42,6 @@
           "value": "application/octet-stream"
         }
       ]
-    }
-  ],
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
     }
   ]
 }
