@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>3D Tetris Tower | Stack & Build</title>
+    <meta name="description" content="Play 3D Tetris Tower - A unique physics-based stacking game where you build towers to reach new heights!">
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html, body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      #unity-container {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      }
+
+      #unity-canvas {
+        width: 100%;
+        height: 100%;
+        max-width: 1280px;
+        max-height: 720px;
+        background: #231f20;
+        box-shadow: 0 19px 38px rgba(0,0,0,0.30), 0 15px 12px rgba(0,0,0,0.22);
+      }
+
+      #unity-loading-bar {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        display: none;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      #unity-logo {
+        width: 154px;
+        height: 130px;
+        background: url('logo.png') no-repeat center;
+        background-size: contain;
+        margin-bottom: 20px;
+      }
+
+      #unity-progress-bar-empty {
+        width: 300px;
+        height: 18px;
+        background-color: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        overflow: hidden;
+      }
+
+      #unity-progress-bar-full {
+        height: 100%;
+        background: linear-gradient(90deg, #00d2ff 0%, #3a47d5 100%);
+        border-radius: 10px;
+        transition: width 0.3s ease;
+      }
+
+      #unity-loading-text {
+        color: white;
+        margin-top: 10px;
+        font-size: 14px;
+      }
+
+      .unity-mobile #unity-canvas {
+        width: 100%;
+        height: 100%;
+        max-width: none;
+        max-height: none;
+      }
+
+      #unity-fullscreen-button {
+        position: absolute;
+        right: 10px;
+        bottom: 10px;
+        width: 38px;
+        height: 38px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 2px solid rgba(255, 255, 255, 0.4);
+        border-radius: 5px;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: all 0.3s ease;
+      }
+
+      #unity-fullscreen-button:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: scale(1.1);
+      }
+
+      #unity-fullscreen-button svg {
+        width: 20px;
+        height: 20px;
+        fill: white;
+      }
+
+      .controls-info {
+        position: absolute;
+        bottom: 60px;
+        left: 10px;
+        color: white;
+        font-size: 12px;
+        background: rgba(0, 0, 0, 0.5);
+        padding: 10px;
+        border-radius: 5px;
+        max-width: 200px;
+      }
+
+      .controls-info h3 {
+        margin-bottom: 5px;
+        font-size: 14px;
+      }
+
+      .controls-info div {
+        margin: 2px 0;
+      }
+
+      @media (max-width: 768px) {
+        .controls-info {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="unity-container">
+      <canvas id="unity-canvas" tabindex="1"></canvas>
+      <div id="unity-loading-bar">
+        <div id="unity-logo"></div>
+        <div id="unity-progress-bar-empty">
+          <div id="unity-progress-bar-full"></div>
+        </div>
+        <div id="unity-loading-text">Loading...</div>
+      </div>
+      <div id="unity-fullscreen-button">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+        </svg>
+      </div>
+      <div class="controls-info">
+        <h3>Controls:</h3>
+        <div>WASD/Arrows - Move</div>
+        <div>Q/E - Rotate Y</div>
+        <div>R/F - Rotate X</div>
+        <div>Z/C - Rotate Z</div>
+        <div>Space - Drop</div>
+        <div>Shift - Soft Drop</div>
+      </div>
+    </div>
+    <script>
+      var container = document.querySelector("#unity-container");
+      var canvas = document.querySelector("#unity-canvas");
+      var loadingBar = document.querySelector("#unity-loading-bar");
+      var progressBarFull = document.querySelector("#unity-progress-bar-full");
+      var fullscreenButton = document.querySelector("#unity-fullscreen-button");
+      var loadingText = document.querySelector("#unity-loading-text");
+
+      var buildUrl = "Build";
+      var loaderUrl = buildUrl + "/{{{ LOADER_FILENAME }}}";
+      var config = {
+        dataUrl: buildUrl + "/{{{ DATA_FILENAME }}}",
+        frameworkUrl: buildUrl + "/{{{ FRAMEWORK_FILENAME }}}",
+        codeUrl: buildUrl + "/{{{ CODE_FILENAME }}}",
+#if MEMORY_FILENAME
+        memoryUrl: buildUrl + "/{{{ MEMORY_FILENAME }}}",
+#endif
+#if SYMBOLS_FILENAME
+        symbolsUrl: buildUrl + "/{{{ SYMBOLS_FILENAME }}}",
+#endif
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "{{{ COMPANY_NAME }}}",
+        productName: "{{{ PRODUCT_NAME }}}",
+        productVersion: "{{{ PRODUCT_VERSION }}}",
+      };
+
+      // Check if mobile
+      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        container.className = "unity-mobile";
+        config.devicePixelRatio = 1;
+      }
+
+      loadingBar.style.display = "flex";
+
+      var script = document.createElement("script");
+      script.src = loaderUrl;
+      script.onload = () => {
+        createUnityInstance(canvas, config, (progress) => {
+          progressBarFull.style.width = 100 * progress + "%";
+          loadingText.textContent = "Loading... " + Math.round(progress * 100) + "%";
+        }).then((unityInstance) => {
+          loadingBar.style.display = "none";
+          fullscreenButton.onclick = () => {
+            unityInstance.SetFullscreen(1);
+          };
+        }).catch((message) => {
+          alert(message);
+        });
+      };
+      document.body.appendChild(script);
+    </script>
+  </body>
+</html>

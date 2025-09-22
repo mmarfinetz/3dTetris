@@ -1,0 +1,44 @@
+# Netlify deployment configuration for Unity WebGL build
+
+[build]
+  publish = "WebGLBuild/"
+
+[[headers]]
+  for = "/Build/*"
+  [headers.values]
+    Cross-Origin-Embedder-Policy = "require-corp"
+    Cross-Origin-Opener-Policy = "same-origin"
+
+[[headers]]
+  for = "*.js"
+  [headers.values]
+    Content-Type = "application/javascript"
+    Content-Encoding = "gzip"
+
+[[headers]]
+  for = "*.wasm"
+  [headers.values]
+    Content-Type = "application/wasm"
+    Content-Encoding = "gzip"
+
+[[headers]]
+  for = "*.data"
+  [headers.values]
+    Content-Type = "application/octet-stream"
+    Content-Encoding = "gzip"
+
+[[headers]]
+  for = "*.br"
+  [headers.values]
+    Content-Encoding = "br"
+
+[[headers]]
+  for = "*.gz"
+  [headers.values]
+    Content-Encoding = "gzip"
+
+# Enable CORS for all files
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
