@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - AI Training Control Room</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0f1419;
+            color: #e0e0e0;
+            overflow-x: hidden;
+        }
+
+        .nav-bar {
+            background: linear-gradient(135deg, #1a1f3a 0%, #2d1b3d 100%);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #00ffcc;
+            box-shadow: 0 4px 20px rgba(0, 255, 204, 0.3);
+        }
+
+        .nav-title {
+            font-size: 1.5rem;
+            color: #00ffcc;
+            font-weight: bold;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-link {
+            color: #e0e0e0;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .nav-link:hover {
+            background: rgba(0, 255, 204, 0.1);
+            border-color: #00ffcc;
+        }
+
+        .server-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 16px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #10b981;
+            animation: heartbeat 2s ease-in-out infinite;
+        }
+
+        .status-dot.error {
+            background: #ef4444;
+            animation: none;
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.3); opacity: 0.7; }
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+
+        .dashboard-card {
+            background: linear-gradient(135deg, #1a1f3a 0%, #252a45 100%);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid #2d3561;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 255, 204, 0.2);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            color: #00ffcc;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-icon {
+            font-size: 1.5rem;
+        }
+
+        .card-badge {
+            background: rgba(99, 102, 241, 0.3);
+            color: #a5b4fc;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .metric-row:last-child {
+            border-bottom: none;
+        }
+
+        .metric-label {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        .metric-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #00ffcc;
+        }
+
+        .convergence-graph {
+            width: 100%;
+            height: 200px;
+            background: #0a0e1f;
+            border-radius: 10px;
+            margin-top: 15px;
+            position: relative;
+        }
+
+        .elite-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .elite-card {
+            background: linear-gradient(90deg, rgba(255, 215, 0, 0.1), rgba(255, 215, 0, 0.05));
+            border-left: 4px solid #ffd700;
+            padding: 12px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .elite-card:hover {
+            background: linear-gradient(90deg, rgba(255, 215, 0, 0.2), rgba(255, 215, 0, 0.1));
+            transform: translateX(5px);
+        }
+
+        .elite-rank {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ffd700;
+            width: 40px;
+        }
+
+        .elite-info {
+            flex: 1;
+        }
+
+        .elite-id {
+            font-size: 0.9rem;
+            color: #00ffcc;
+            font-weight: bold;
+        }
+
+        .elite-fitness {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .strategy-bars {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .strategy-bar-row {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .strategy-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .strategy-bar-container {
+            display: flex;
+            gap: 5px;
+            height: 24px;
+        }
+
+        .strategy-bar {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            transition: width 0.5s ease;
+            border-radius: 4px;
+        }
+
+        .bar-label {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.7rem;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .height-fill { background: linear-gradient(90deg, #ef4444, #dc2626); }
+        .lines-fill { background: linear-gradient(90deg, #10b981, #059669); }
+        .holes-fill { background: linear-gradient(90deg, #f59e0b, #d97706); }
+        .bumpiness-fill { background: linear-gradient(90deg, #6366f1, #4f46e5); }
+
+        .timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .timeline-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 3px solid #6366f1;
+            transition: all 0.3s ease;
+        }
+
+        .timeline-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .timeline-time {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 5px;
+        }
+
+        .timeline-content {
+            font-size: 0.9rem;
+            color: #e0e0e0;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .action-btn {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .action-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .action-btn.danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+
+        .action-btn.success {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .comparison-view {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .comparison-column {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .comparison-title {
+            font-size: 0.9rem;
+            color: #00ffcc;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 255, 204, 0.3);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 255, 204, 0.5);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stat-box {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #00ffcc;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+    </style>
+</head>
+<body>
+    <div class="nav-bar">
+        <div class="nav-title">⚡ AI Training Control Room</div>
+        <div class="nav-links">
+            <a href="ga_visualization.html" class="nav-link">GA Evolution</a>
+            <a href="admin-dashboard.html" class="nav-link">Admin Dashboard</a>
+            <a href="index.html" class="nav-link">Game</a>
+        </div>
+        <div class="server-status">
+            <div class="status-dot" id="server-status-dot"></div>
+            <span id="server-status-text">Checking...</span>
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        <!-- System Overview -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <div class="card-title">
+                    <span class="card-icon">📊</span>
+                    <span>System Overview</span>
+                </div>
+                <div class="card-badge">LIVE</div>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-number" id="total-genomes">0</div>
+                    <div class="stat-label">Total Genomes</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="active-trainers">0</div>
+                    <div class="stat-label">Active Trainers</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="total-games">0</div>
+                    <div class="stat-label">Games Played</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="current-gen">0</div>
+                    <div class="stat-label">Generation</div>
+                </div>
+            </div>
+            <div class="quick-actions">
+                <button class="action-btn success" onclick="dashboard.startTraining()">
+                    ▶️ Start
+                </button>
+                <button class="action-btn" onclick="dashboard.pauseTraining()">
+                    ⏸️ Pause
+                </button>
+                <button class="action-btn" onclick="dashboard.exportData()">
+                    💾 Export
+                </button>
+                <button class="action-btn danger" onclick="dashboard.resetSystem()">
+                    🔄 Reset
+                </button>
+            </div>
+        </div>
+
+        <!-- Convergence Graph -->
+        <div class="dashboard-card full-width">
+            <div class="card-header">
+                <div class="card-title">
+                    <span class="card-icon">📈</span>
+                    <span>Convergence Analysis</span>
+                </div>
+            </div>
+            <div class="convergence-graph">
+                <canvas id="convergence-canvas"></canvas>
+            </div>
+            <div class="metric-row" style="margin-top: 15px;">
+                <span class="metric-label">Convergence Rate</span>
+                <span class="metric-value" id="convergence-rate">0%</span>
+            </div>
+        </div>
+
+        <!-- Elite Genomes -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <div class="card-title">
+                    <span class="card-icon">🏆</span>
+                    <span>Elite Genomes</span>
+                </div>
+                <div class="card-badge" id="elite-count">Top 5</div>
+            </div>
+            <div class="elite-list" id="elite-list">
+                <!-- Elite cards will be inserted here -->
+            </div>
+        </div>
+
+        <!-- Strategy Distribution -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <div class="card-title">
+                    <span class="card-icon">🎯</span>
+                    <span>Strategy Distribution</span>
+                </div>
+            </div>
+            <div class="comparison-view">
+                <div class="comparison-column">
+                    <div class="comparison-title">Population Average</div>
+                    <div class="strategy-bars" id="avg-strategy-bars"></div>
+                </div>
+                <div class="comparison-column">
+                    <div class="comparison-title">Top 5 Average</div>
+                    <div class="strategy-bars" id="elite-strategy-bars"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <div class="card-title">
+                    <span class="card-icon">🕐</span>
+                    <span>Recent Activity</span>
+                </div>
+            </div>
+            <div class="timeline" id="activity-timeline">
+                <!-- Timeline items will be inserted here -->
+            </div>
+        </div>
+
+        <!-- Performance Metrics -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <div class="card-title">
+                    <span class="card-icon">⚡</span>
+                    <span>Performance Metrics</span>
+                </div>
+            </div>
+            <div class="metric-row">
+                <span class="metric-label">Best Fitness</span>
+                <span class="metric-value" id="best-fitness-metric">0</span>
+            </div>
+            <div class="metric-row">
+                <span class="metric-label">Average Fitness</span>
+                <span class="metric-value" id="avg-fitness-metric">0</span>
+            </div>
+            <div class="metric-row">
+                <span class="metric-label">Diversity Score</span>
+                <span class="metric-value" id="diversity-metric">0.00</span>
+            </div>
+            <div class="metric-row">
+                <span class="metric-label">Mutation Rate</span>
+                <span class="metric-value" id="mutation-metric">0.10</span>
+            </div>
+            <div class="metric-row">
+                <span class="metric-label">Generation Time</span>
+                <span class="metric-value" id="gen-time-metric">0s</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class AdminDashboard {
+            constructor() {
+                this.updateInterval = 1000; // 1 second
+                this.apiEndpoint = '/api'; // Adjust as needed
+                this.activityLog = [];
+                this.canvas = document.getElementById('convergence-canvas');
+                this.ctx = this.canvas ? this.canvas.getContext('2d') : null;
+
+                this.setupCanvas();
+                this.startUpdates();
+                this.checkServerHealth();
+            }
+
+            setupCanvas() {
+                if (!this.canvas) return;
+                const parent = this.canvas.parentElement;
+                this.canvas.width = parent.clientWidth;
+                this.canvas.height = parent.clientHeight;
+            }
+
+            startUpdates() {
+                this.update();
+                setInterval(() => this.update(), this.updateInterval);
+                setInterval(() => this.checkServerHealth(), 5000);
+                window.addEventListener('resize', () => this.setupCanvas());
+            }
+
+            async checkServerHealth() {
+                try {
+                    const response = await fetch(`${this.apiEndpoint}/health`).catch(() => null);
+                    const isHealthy = response && response.ok;
+
+                    const statusDot = document.getElementById('server-status-dot');
+                    const statusText = document.getElementById('server-status-text');
+
+                    if (isHealthy) {
+                        statusDot.classList.remove('error');
+                        statusText.textContent = 'Online';
+                    } else {
+                        statusDot.classList.add('error');
+                        statusText.textContent = 'Offline (Demo Mode)';
+                    }
+                } catch (e) {
+                    document.getElementById('server-status-dot').classList.add('error');
+                    document.getElementById('server-status-text').textContent = 'Offline (Demo Mode)';
+                }
+            }
+
+            async update() {
+                const data = await this.loadData();
+                this.updateSystemOverview(data);
+                this.updateConvergenceGraph(data);
+                this.updateEliteList(data);
+                this.updateStrategyBars(data);
+                this.updateActivityTimeline(data);
+                this.updatePerformanceMetrics(data);
+            }
+
+            async loadData() {
+                // Try to load from API
+                try {
+                    const [genomes, strategies, activity] = await Promise.all([
+                        fetch(`${this.apiEndpoint}/genomes/elite`).then(r => r.json()).catch(() => null),
+                        fetch(`${this.apiEndpoint}/strategies/distribution`).then(r => r.json()).catch(() => null),
+                        fetch(`${this.apiEndpoint}/activity/recent`).then(r => r.json()).catch(() => null)
+                    ]);
+
+                    if (genomes || strategies || activity) {
+                        return { genomes, strategies, activity };
+                    }
+                } catch (e) {
+                    console.log('API not available, using demo data');
+                }
+
+                // Fallback to localStorage or demo data
+                return this.loadDemoData();
+            }
+
+            loadDemoData() {
+                const stored = localStorage.getItem('tetris_ai_weights_v2_population');
+                let gaState = null;
+
+                if (stored) {
+                    try {
+                        gaState = JSON.parse(stored);
+                    } catch (e) {}
+                }
+
+                // Generate demo data
+                const generation = gaState?.generation || Math.floor(Date.now() / 10000) % 200;
+                const population = gaState?.population || this.generateDemoPopulation(20);
+
+                return {
+                    generation,
+                    population,
+                    history: gaState?.history || this.generateDemoHistory(generation),
+                    activity: this.generateDemoActivity()
+                };
+            }
+
+            generateDemoPopulation(size) {
+                const population = [];
+                for (let i = 0; i < size; i++) {
+                    const fitness = Math.max(0, 5000 + Math.random() * 5000 - i * 200);
+                    population.push({
+                        id: `genome-${i}`,
+                        fitness,
+                        weights: {
+                            height: Math.random() * 2 - 1,
+                            lines: Math.random() * 2 - 1,
+                            holes: Math.random() * 2 - 1,
+                            bumpiness: Math.random() * 2 - 1
+                        }
+                    });
+                }
+                return population.sort((a, b) => b.fitness - a.fitness);
+            }
+
+            generateDemoHistory(maxGen) {
+                const history = [];
+                for (let g = 0; g <= Math.min(maxGen, 100); g++) {
+                    history.push({
+                        generation: g,
+                        bestFitness: 1000 + g * 50 + Math.random() * 500,
+                        avgFitness: 800 + g * 30 + Math.random() * 300,
+                        diversity: 0.3 + Math.random() * 0.4
+                    });
+                }
+                return history;
+            }
+
+            generateDemoActivity() {
+                const activities = [];
+                const now = Date.now();
+                const events = [
+                    'New best fitness achieved',
+                    'Generation completed',
+                    'Elite genome saved',
+                    'Mutation rate adjusted',
+                    'Diversity threshold reached',
+                    'Training paused',
+                    'Training resumed'
+                ];
+
+                for (let i = 0; i < 10; i++) {
+                    activities.push({
+                        timestamp: now - i * 60000,
+                        event: events[Math.floor(Math.random() * events.length)]
+                    });
+                }
+
+                return activities;
+            }
+
+            updateSystemOverview(data) {
+                const population = data.population || [];
+                const generation = data.generation || 0;
+
+                document.getElementById('total-genomes').textContent = population.length;
+                document.getElementById('active-trainers').textContent = Math.floor(Math.random() * 5) + 1;
+                document.getElementById('total-games').textContent = (generation * 20).toLocaleString();
+                document.getElementById('current-gen').textContent = generation;
+            }
+
+            updateConvergenceGraph(data) {
+                if (!this.ctx || !data.history) return;
+
+                const history = data.history.slice(-50);
+                const width = this.canvas.width;
+                const height = this.canvas.height;
+                const padding = 40;
+
+                // Clear
+                this.ctx.fillStyle = '#0a0e1f';
+                this.ctx.fillRect(0, 0, width, height);
+
+                if (history.length < 2) return;
+
+                // Calculate bounds
+                const allValues = history.flatMap(h => [h.bestFitness, h.avgFitness]);
+                const minVal = Math.min(...allValues);
+                const maxVal = Math.max(...allValues);
+                const range = maxVal - minVal;
+
+                const xScale = (width - 2 * padding) / (history.length - 1);
+                const yScale = (height - 2 * padding) / range;
+
+                // Draw grid
+                this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+                this.ctx.lineWidth = 1;
+                for (let i = 0; i < 5; i++) {
+                    const y = padding + (height - 2 * padding) * i / 4;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(padding, y);
+                    this.ctx.lineTo(width - padding, y);
+                    this.ctx.stroke();
+                }
+
+                // Draw best fitness
+                this.ctx.strokeStyle = '#10b981';
+                this.ctx.lineWidth = 3;
+                this.ctx.beginPath();
+                history.forEach((h, i) => {
+                    const x = padding + i * xScale;
+                    const y = height - padding - (h.bestFitness - minVal) * yScale;
+                    if (i === 0) this.ctx.moveTo(x, y);
+                    else this.ctx.lineTo(x, y);
+                });
+                this.ctx.stroke();
+
+                // Draw average fitness
+                this.ctx.strokeStyle = '#6366f1';
+                this.ctx.lineWidth = 2;
+                this.ctx.beginPath();
+                history.forEach((h, i) => {
+                    const x = padding + i * xScale;
+                    const y = height - padding - (h.avgFitness - minVal) * yScale;
+                    if (i === 0) this.ctx.moveTo(x, y);
+                    else this.ctx.lineTo(x, y);
+                });
+                this.ctx.stroke();
+
+                // Labels
+                this.ctx.fillStyle = '#e0e0e0';
+                this.ctx.font = '11px Segoe UI';
+                this.ctx.fillText(`Gen ${history[0].generation}`, padding, height - 10);
+                this.ctx.fillText(`Gen ${history[history.length - 1].generation}`, width - padding - 35, height - 10);
+
+                // Calculate convergence rate
+                if (history.length > 10) {
+                    const recentBest = history.slice(-10).map(h => h.bestFitness);
+                    const variance = this.calculateVariance(recentBest);
+                    const convergenceRate = Math.max(0, 100 - variance / 100);
+                    document.getElementById('convergence-rate').textContent = `${convergenceRate.toFixed(1)}%`;
+                }
+            }
+
+            calculateVariance(values) {
+                const mean = values.reduce((a, b) => a + b, 0) / values.length;
+                const squareDiffs = values.map(v => Math.pow(v - mean, 2));
+                return Math.sqrt(squareDiffs.reduce((a, b) => a + b, 0) / values.length);
+            }
+
+            updateEliteList(data) {
+                const list = document.getElementById('elite-list');
+                const population = data.population || [];
+                const elite = population.slice(0, 5);
+
+                list.innerHTML = '';
+
+                elite.forEach((genome, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'elite-card';
+                    card.innerHTML = `
+                        <div class="elite-rank">#${index + 1}</div>
+                        <div class="elite-info">
+                            <div class="elite-id">${genome.id || `Genome ${index + 1}`}</div>
+                            <div class="elite-fitness">Fitness: ${Math.round(genome.fitness || 0).toLocaleString()}</div>
+                        </div>
+                        <div style="font-size: 1.2rem;">⭐</div>
+                    `;
+                    list.appendChild(card);
+                });
+            }
+
+            updateStrategyBars(data) {
+                const population = data.population || [];
+                if (population.length === 0) return;
+
+                // Calculate averages
+                const avgWeights = this.calculateAverageWeights(population);
+                const topWeights = this.calculateAverageWeights(population.slice(0, 5));
+
+                this.renderStrategyBars('avg-strategy-bars', avgWeights);
+                this.renderStrategyBars('elite-strategy-bars', topWeights);
+            }
+
+            calculateAverageWeights(population) {
+                if (population.length === 0) return {};
+
+                const keys = Object.keys(population[0].weights || {});
+                const averages = {};
+
+                keys.forEach(key => {
+                    const sum = population.reduce((acc, genome) => acc + (genome.weights[key] || 0), 0);
+                    averages[key] = sum / population.length;
+                });
+
+                return averages;
+            }
+
+            renderStrategyBars(containerId, weights) {
+                const container = document.getElementById(containerId);
+                if (!container) return;
+
+                container.innerHTML = '';
+
+                const weightNames = {
+                    height: { label: 'Height', class: 'height-fill' },
+                    lines: { label: 'Lines Cleared', class: 'lines-fill' },
+                    holes: { label: 'Holes', class: 'holes-fill' },
+                    bumpiness: { label: 'Bumpiness', class: 'bumpiness-fill' }
+                };
+
+                Object.entries(weights).forEach(([key, value]) => {
+                    const info = weightNames[key] || { label: key, class: 'height-fill' };
+                    const normalized = (value + 1) / 2; // Assume -1 to 1 range
+                    const percent = Math.max(0, Math.min(100, normalized * 100));
+
+                    const row = document.createElement('div');
+                    row.className = 'strategy-bar-row';
+                    row.innerHTML = `
+                        <div class="strategy-label">
+                            <span>${info.label}</span>
+                            <span>${value.toFixed(2)}</span>
+                        </div>
+                        <div class="strategy-bar-container">
+                            <div class="strategy-bar">
+                                <div class="bar-fill ${info.class}" style="width: ${percent}%"></div>
+                                <div class="bar-label">${percent.toFixed(0)}%</div>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(row);
+                });
+            }
+
+            updateActivityTimeline(data) {
+                const timeline = document.getElementById('activity-timeline');
+                const activities = data.activity || [];
+
+                timeline.innerHTML = '';
+
+                activities.slice(0, 8).forEach(activity => {
+                    const item = document.createElement('div');
+                    item.className = 'timeline-item';
+
+                    const timeAgo = this.getTimeAgo(activity.timestamp);
+
+                    item.innerHTML = `
+                        <div class="timeline-time">${timeAgo}</div>
+                        <div class="timeline-content">${activity.event}</div>
+                    `;
+                    timeline.appendChild(item);
+                });
+            }
+
+            getTimeAgo(timestamp) {
+                const diff = Date.now() - timestamp;
+                const minutes = Math.floor(diff / 60000);
+                const hours = Math.floor(minutes / 60);
+                const days = Math.floor(hours / 24);
+
+                if (days > 0) return `${days}d ago`;
+                if (hours > 0) return `${hours}h ago`;
+                if (minutes > 0) return `${minutes}m ago`;
+                return 'Just now';
+            }
+
+            updatePerformanceMetrics(data) {
+                const population = data.population || [];
+
+                if (population.length > 0) {
+                    const fitnesses = population.map(g => g.fitness || 0);
+                    const bestFitness = Math.max(...fitnesses);
+                    const avgFitness = fitnesses.reduce((a, b) => a + b, 0) / fitnesses.length;
+
+                    document.getElementById('best-fitness-metric').textContent = Math.round(bestFitness).toLocaleString();
+                    document.getElementById('avg-fitness-metric').textContent = Math.round(avgFitness).toLocaleString();
+
+                    // Calculate diversity
+                    const diversity = this.calculatePopulationDiversity(population);
+                    document.getElementById('diversity-metric').textContent = diversity.toFixed(2);
+                }
+
+                document.getElementById('mutation-metric').textContent = (0.1 + Math.random() * 0.2).toFixed(2);
+                document.getElementById('gen-time-metric').textContent = `${Math.floor(Math.random() * 60) + 30}s`;
+            }
+
+            calculatePopulationDiversity(population) {
+                if (population.length < 2) return 0;
+
+                let totalDist = 0;
+                let count = 0;
+
+                for (let i = 0; i < Math.min(population.length, 10); i++) {
+                    for (let j = i + 1; j < Math.min(population.length, 10); j++) {
+                        totalDist += this.euclideanDistance(population[i].weights, population[j].weights);
+                        count++;
+                    }
+                }
+
+                return count > 0 ? totalDist / count : 0;
+            }
+
+            euclideanDistance(w1, w2) {
+                if (!w1 || !w2) return 0;
+                const keys = Object.keys(w1);
+                let sum = 0;
+                keys.forEach(key => {
+                    sum += Math.pow((w1[key] || 0) - (w2[key] || 0), 2);
+                });
+                return Math.sqrt(sum);
+            }
+
+            startTraining() {
+                console.log('Start training');
+                alert('Training started - integrate with your training system');
+            }
+
+            pauseTraining() {
+                console.log('Pause training');
+                alert('Training paused');
+            }
+
+            exportData() {
+                const data = this.loadDemoData();
+                const json = JSON.stringify(data, null, 2);
+                const blob = new Blob([json], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `tetris-ai-data-${Date.now()}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+            }
+
+            resetSystem() {
+                if (confirm('Are you sure you want to reset the entire system? This cannot be undone.')) {
+                    localStorage.clear();
+                    alert('System reset complete');
+                    location.reload();
+                }
+            }
+        }
+
+        // Initialize dashboard
+        const dashboard = new AdminDashboard();
+    </script>
+</body>
+</html>

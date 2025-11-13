@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generation Comparison - Time Travel Through Evolution</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0e27;
+            color: #e0e0e0;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1a1f3a 0%, #2d1b3d 100%);
+            padding: 20px 30px;
+            border-bottom: 2px solid #00ffcc;
+            box-shadow: 0 4px 20px rgba(0, 255, 204, 0.3);
+        }
+
+        .header-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 2rem;
+            color: #00ffcc;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-link {
+            color: #e0e0e0;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            background: rgba(0, 255, 204, 0.1);
+            border-color: #00ffcc;
+        }
+
+        .main-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+
+        .controls-panel {
+            background: linear-gradient(135deg, #1a1f3a 0%, #252a45 100%);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 1px solid #2d3561;
+        }
+
+        .controls-title {
+            font-size: 1.3rem;
+            color: #00ffcc;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .selector-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 20px;
+        }
+
+        .selector-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .selector-label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: bold;
+        }
+
+        .gen-selector {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .gen-input {
+            flex: 1;
+            appearance: none;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .gen-input::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(99, 102, 241, 0.5);
+        }
+
+        .gen-input::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+        }
+
+        .gen-value {
+            min-width: 120px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #00ffcc;
+            padding: 8px 16px;
+            background: rgba(0, 255, 204, 0.1);
+            border-radius: 8px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.6);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.6);
+        }
+
+        .comparison-view {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .genome-panel {
+            background: linear-gradient(135deg, #1a1f3a 0%, #252a45 100%);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid #2d3561;
+        }
+
+        .genome-panel.generation-a {
+            border: 2px solid #6366f1;
+        }
+
+        .genome-panel.generation-b {
+            border: 2px solid #d946ef;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .panel-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .generation-a .panel-title {
+            color: #6366f1;
+        }
+
+        .generation-b .panel-title {
+            color: #d946ef;
+        }
+
+        .panel-badge {
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        .generation-a .panel-badge {
+            background: rgba(99, 102, 241, 0.2);
+            color: #a5b4fc;
+        }
+
+        .generation-b .panel-badge {
+            background: rgba(217, 70, 239, 0.2);
+            color: #f0abfc;
+        }
+
+        .genome-canvas {
+            width: 100%;
+            height: 300px;
+            background: #0a0e1f;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stats-section {
+            margin-bottom: 20px;
+        }
+
+        .stats-title {
+            font-size: 1.1rem;
+            color: #00ffcc;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .stat-label {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .stat-value {
+            font-weight: bold;
+            color: #00ffcc;
+        }
+
+        .weights-visualization {
+            margin-top: 20px;
+        }
+
+        .weight-bar {
+            margin-bottom: 15px;
+        }
+
+        .weight-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        .weight-bar-bg {
+            width: 100%;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .weight-bar-fill {
+            height: 100%;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        .comparison-summary {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, #1a1f3a 0%, #252a45 100%);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid #2d3561;
+            margin-top: 30px;
+        }
+
+        .summary-title {
+            font-size: 1.5rem;
+            color: #00ffcc;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .summary-card {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .summary-metric {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #00ffcc;
+            margin-bottom: 8px;
+        }
+
+        .summary-label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .difference-indicator {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-left: 8px;
+        }
+
+        .difference-indicator.positive {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+
+        .difference-indicator.negative {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        .timeline-scrubber {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+
+        .scrubber-label {
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .playback-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .play-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .play-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.6);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1>
+                <span>⏱️</span>
+                <span>Generation Time Travel</span>
+            </h1>
+            <div class="nav-links">
+                <a href="ga_visualization.html" class="nav-link">GA Dashboard</a>
+                <a href="admin-dashboard.html" class="nav-link">Admin</a>
+                <a href="index.html" class="nav-link">Game</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="controls-panel">
+            <div class="controls-title">
+                <span>🎮</span>
+                <span>Select Generations to Compare</span>
+            </div>
+            <div class="selector-row">
+                <div class="selector-group">
+                    <div class="selector-label">Generation A (Blue)</div>
+                    <div class="gen-selector">
+                        <input type="range" class="gen-input" id="gen-a-slider" min="0" max="100" value="0">
+                        <div class="gen-value" id="gen-a-value">Gen 0</div>
+                    </div>
+                </div>
+                <div class="selector-group">
+                    <div class="selector-label">Generation B (Pink)</div>
+                    <div class="gen-selector">
+                        <input type="range" class="gen-input" id="gen-b-slider" min="0" max="100" value="50">
+                        <div class="gen-value" id="gen-b-value">Gen 50</div>
+                    </div>
+                </div>
+            </div>
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="comparer.loadComparison()">
+                    🔍 Compare Generations
+                </button>
+                <button class="btn btn-secondary" onclick="comparer.autoPlay()">
+                    ▶️ Auto-Play Evolution
+                </button>
+            </div>
+            <div class="timeline-scrubber">
+                <div class="scrubber-label">Timeline Scrubber - Watch Evolution Unfold</div>
+                <input type="range" class="gen-input" id="timeline-scrubber" min="0" max="100" value="0" style="width: 100%;">
+                <div class="playback-controls">
+                    <button class="play-btn" onclick="comparer.toggleAutoPlay()">
+                        <span id="play-icon">▶️</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="comparison-view">
+            <div class="genome-panel generation-a">
+                <div class="panel-header">
+                    <div class="panel-title" id="panel-a-title">Generation 0</div>
+                    <div class="panel-badge">Early Stage</div>
+                </div>
+                <canvas class="genome-canvas" id="canvas-a" width="600" height="300"></canvas>
+                <div class="stats-section">
+                    <div class="stats-title">Performance Metrics</div>
+                    <div class="stat-item">
+                        <span class="stat-label">Best Fitness</span>
+                        <span class="stat-value" id="fitness-a">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Average Fitness</span>
+                        <span class="stat-value" id="avg-fitness-a">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Diversity</span>
+                        <span class="stat-value" id="diversity-a">0.00</span>
+                    </div>
+                </div>
+                <div class="weights-visualization" id="weights-a">
+                    <!-- Weight bars will be inserted here -->
+                </div>
+            </div>
+
+            <div class="genome-panel generation-b">
+                <div class="panel-header">
+                    <div class="panel-title" id="panel-b-title">Generation 50</div>
+                    <div class="panel-badge">Evolved</div>
+                </div>
+                <canvas class="genome-canvas" id="canvas-b" width="600" height="300"></canvas>
+                <div class="stats-section">
+                    <div class="stats-title">Performance Metrics</div>
+                    <div class="stat-item">
+                        <span class="stat-label">Best Fitness</span>
+                        <span class="stat-value" id="fitness-b">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Average Fitness</span>
+                        <span class="stat-value" id="avg-fitness-b">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Diversity</span>
+                        <span class="stat-value" id="diversity-b">0.00</span>
+                    </div>
+                </div>
+                <div class="weights-visualization" id="weights-b">
+                    <!-- Weight bars will be inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <div class="comparison-summary">
+            <div class="summary-title">📊 Comparison Analysis</div>
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <div class="summary-metric" id="fitness-improvement">+0%</div>
+                    <div class="summary-label">Fitness Improvement</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-metric" id="generation-gap">0</div>
+                    <div class="summary-label">Generations Apart</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-metric" id="strategy-shift">0%</div>
+                    <div class="summary-label">Strategy Shift</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-metric" id="learning-rate">0%</div>
+                    <div class="summary-label">Learning Rate</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class GenerationComparer {
+            constructor() {
+                this.maxGeneration = 100;
+                this.genA = 0;
+                this.genB = 50;
+                this.isPlaying = false;
+                this.playInterval = null;
+
+                this.setupEventListeners();
+                this.loadComparison();
+            }
+
+            setupEventListeners() {
+                document.getElementById('gen-a-slider').addEventListener('input', (e) => {
+                    this.genA = parseInt(e.target.value);
+                    document.getElementById('gen-a-value').textContent = `Gen ${this.genA}`;
+                });
+
+                document.getElementById('gen-b-slider').addEventListener('input', (e) => {
+                    this.genB = parseInt(e.target.value);
+                    document.getElementById('gen-b-value').textContent = `Gen ${this.genB}`;
+                });
+
+                document.getElementById('timeline-scrubber').addEventListener('input', (e) => {
+                    const gen = parseInt(e.target.value);
+                    this.genA = Math.max(0, gen - 10);
+                    this.genB = gen;
+                    document.getElementById('gen-a-slider').value = this.genA;
+                    document.getElementById('gen-b-slider').value = this.genB;
+                    document.getElementById('gen-a-value').textContent = `Gen ${this.genA}`;
+                    document.getElementById('gen-b-value').textContent = `Gen ${this.genB}`;
+                    this.loadComparison();
+                });
+            }
+
+            loadComparison() {
+                const dataA = this.generateGenerationData(this.genA);
+                const dataB = this.generateGenerationData(this.genB);
+
+                this.updatePanel('a', this.genA, dataA);
+                this.updatePanel('b', this.genB, dataB);
+                this.updateSummary(dataA, dataB);
+            }
+
+            generateGenerationData(generation) {
+                const baselineFitness = 1000 + generation * 50;
+                const improvementFactor = Math.log(generation + 1) * 100;
+                const totalFitness = baselineFitness + improvementFactor;
+
+                const weights = {
+                    height: -0.5 + (generation / 100) * 0.3,
+                    lines: 0.8 + (generation / 100) * 0.15,
+                    holes: -0.7 + (generation / 100) * 0.2,
+                    bumpiness: -0.4 + (generation / 100) * 0.25
+                };
+
+                return {
+                    generation,
+                    bestFitness: totalFitness + Math.random() * 200,
+                    avgFitness: totalFitness * 0.7 + Math.random() * 100,
+                    diversity: 0.8 - (generation / 100) * 0.4,
+                    weights
+                };
+            }
+
+            updatePanel(panel, generation, data) {
+                document.getElementById(`panel-${panel}-title`).textContent = `Generation ${generation}`;
+                document.getElementById(`fitness-${panel}`).textContent = Math.round(data.bestFitness).toLocaleString();
+                document.getElementById(`avg-fitness-${panel}`).textContent = Math.round(data.avgFitness).toLocaleString();
+                document.getElementById(`diversity-${panel}`).textContent = data.diversity.toFixed(2);
+
+                this.drawGenomeVisualization(panel, data);
+                this.renderWeights(panel, data.weights);
+            }
+
+            drawGenomeVisualization(panel, data) {
+                const canvas = document.getElementById(`canvas-${panel}`);
+                const ctx = canvas.getContext('2d');
+                const width = canvas.width;
+                const height = canvas.height;
+
+                // Clear
+                ctx.fillStyle = '#0a0e1f';
+                ctx.fillRect(0, 0, width, height);
+
+                // Draw weight visualization as bars
+                const weights = Object.values(data.weights);
+                const barWidth = width / weights.length;
+
+                weights.forEach((weight, i) => {
+                    const normalized = (weight + 1) / 2;
+                    const barHeight = normalized * height;
+
+                    const hue = i * (360 / weights.length);
+                    const gradient = ctx.createLinearGradient(0, height - barHeight, 0, height);
+                    gradient.addColorStop(0, `hsl(${hue}, 70%, 60%)`);
+                    gradient.addColorStop(1, `hsl(${hue}, 70%, 40%)`);
+
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(i * barWidth + 10, height - barHeight, barWidth - 20, barHeight);
+
+                    // Label
+                    ctx.fillStyle = '#e0e0e0';
+                    ctx.font = '12px Segoe UI';
+                    ctx.textAlign = 'center';
+                    const labels = ['Height', 'Lines', 'Holes', 'Bump'];
+                    ctx.fillText(labels[i], i * barWidth + barWidth / 2, height - 10);
+                    ctx.fillText(weight.toFixed(2), i * barWidth + barWidth / 2, height - barHeight - 10);
+                });
+
+                // Draw fitness indicator
+                ctx.fillStyle = '#00ffcc';
+                ctx.font = 'bold 16px Segoe UI';
+                ctx.textAlign = 'left';
+                ctx.fillText(`Fitness: ${Math.round(data.bestFitness).toLocaleString()}`, 10, 30);
+            }
+
+            renderWeights(panel, weights) {
+                const container = document.getElementById(`weights-${panel}`);
+                container.innerHTML = '<div class="stats-title">Weight Distribution</div>';
+
+                const weightInfo = {
+                    height: { label: 'Height Penalty', color: '#ef4444' },
+                    lines: { label: 'Lines Cleared', color: '#10b981' },
+                    holes: { label: 'Holes Penalty', color: '#f59e0b' },
+                    bumpiness: { label: 'Bumpiness Penalty', color: '#6366f1' }
+                };
+
+                Object.entries(weights).forEach(([key, value]) => {
+                    const info = weightInfo[key];
+                    const normalized = (value + 1) / 2;
+                    const percent = Math.max(0, Math.min(100, normalized * 100));
+
+                    const barDiv = document.createElement('div');
+                    barDiv.className = 'weight-bar';
+                    barDiv.innerHTML = `
+                        <div class="weight-label">
+                            <span>${info.label}</span>
+                            <span style="color: ${info.color}">${value.toFixed(2)}</span>
+                        </div>
+                        <div class="weight-bar-bg">
+                            <div class="weight-bar-fill" style="width: ${percent}%; background: ${info.color};">
+                                ${percent.toFixed(0)}%
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(barDiv);
+                });
+            }
+
+            updateSummary(dataA, dataB) {
+                const fitnessImprovement = ((dataB.bestFitness - dataA.bestFitness) / dataA.bestFitness * 100);
+                document.getElementById('fitness-improvement').textContent = `${fitnessImprovement > 0 ? '+' : ''}${fitnessImprovement.toFixed(1)}%`;
+
+                const generationGap = Math.abs(this.genB - this.genA);
+                document.getElementById('generation-gap').textContent = generationGap;
+
+                // Calculate strategy shift (Euclidean distance between weights)
+                const weightsA = Object.values(dataA.weights);
+                const weightsB = Object.values(dataB.weights);
+                let dist = 0;
+                weightsA.forEach((w, i) => dist += Math.pow(w - weightsB[i], 2));
+                const strategyShift = Math.sqrt(dist) * 100;
+                document.getElementById('strategy-shift').textContent = `${strategyShift.toFixed(0)}%`;
+
+                // Learning rate (improvement per generation)
+                const learningRate = generationGap > 0 ? (fitnessImprovement / generationGap).toFixed(2) : '0.00';
+                document.getElementById('learning-rate').textContent = `${learningRate}%/gen`;
+            }
+
+            toggleAutoPlay() {
+                this.isPlaying = !this.isPlaying;
+                const icon = document.getElementById('play-icon');
+
+                if (this.isPlaying) {
+                    icon.textContent = '⏸️';
+                    this.playInterval = setInterval(() => {
+                        const scrubber = document.getElementById('timeline-scrubber');
+                        let current = parseInt(scrubber.value);
+                        current = (current + 1) % (this.maxGeneration + 1);
+                        scrubber.value = current;
+                        scrubber.dispatchEvent(new Event('input'));
+                    }, 1000);
+                } else {
+                    icon.textContent = '▶️';
+                    if (this.playInterval) {
+                        clearInterval(this.playInterval);
+                        this.playInterval = null;
+                    }
+                }
+            }
+
+            autoPlay() {
+                if (!this.isPlaying) {
+                    this.toggleAutoPlay();
+                }
+            }
+        }
+
+        // Initialize comparer
+        const comparer = new GenerationComparer();
+    </script>
+</body>
+</html>
