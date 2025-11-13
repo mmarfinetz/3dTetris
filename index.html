@@ -133,6 +133,62 @@
             margin: 0.5rem 0;
         }
 
+        .viz-links {
+            background: rgba(0,0,0,0.3);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem 0;
+            border: 2px solid #00ffcc;
+        }
+
+        .viz-links h3 {
+            color: #00ffcc;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            font-size: 1.5rem;
+        }
+
+        .viz-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .viz-link {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-decoration: none;
+            color: white;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            border: 2px solid transparent;
+        }
+
+        .viz-link:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            border-color: #00ffcc;
+        }
+
+        .viz-icon {
+            font-size: 2.5rem;
+        }
+
+        .viz-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .viz-desc {
+            font-size: 0.85rem;
+            opacity: 0.9;
+            text-align: center;
+        }
+
         .footer {
             margin-top: 3rem;
             opacity: 0.7;
@@ -254,6 +310,40 @@
             <div class="control-item">
                 <span class="key">Shift</span>
                 <span>Soft drop</span>
+            </div>
+        </div>
+
+        <div class="viz-links">
+            <h3>🧬 AI Visualization Control Room</h3>
+            <p style="text-align: center; margin-bottom: 1.5rem; opacity: 0.8;">
+                Watch the AI brains evolve in real-time with interactive dashboards
+            </p>
+            <div class="viz-grid">
+                <a href="ga_visualization.html" class="viz-link">
+                    <div class="viz-icon">📈</div>
+                    <div class="viz-title">GA Evolution</div>
+                    <div class="viz-desc">Live genetic algorithm dashboard with population tracking</div>
+                </a>
+                <a href="local-trainer.html" class="viz-link">
+                    <div class="viz-icon">🧪</div>
+                    <div class="viz-title">Genome Lab</div>
+                    <div class="viz-desc">Local trainer with training curves and sparklines</div>
+                </a>
+                <a href="admin-dashboard.html" class="viz-link">
+                    <div class="viz-icon">⚡</div>
+                    <div class="viz-title">Admin Dashboard</div>
+                    <div class="viz-desc">System overview with convergence analysis</div>
+                </a>
+                <a href="ai-visualizer.html" class="viz-link">
+                    <div class="viz-icon">🧠</div>
+                    <div class="viz-title">AI Decision Viz</div>
+                    <div class="viz-desc">Watch AI thinking with heatmaps and lookahead</div>
+                </a>
+                <a href="generation-compare.html" class="viz-link">
+                    <div class="viz-icon">⏱️</div>
+                    <div class="viz-title">Time Travel</div>
+                    <div class="viz-desc">Compare generations side-by-side</div>
+                </a>
             </div>
         </div>
 

@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GA Evolution Dashboard - Watch the Brains Evolve</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0e27;
+            color: #e0e0e0;
+            overflow-x: hidden;
+        }
+
+        .dashboard-header {
+            background: linear-gradient(135deg, #1a1f3a 0%, #2d1b3d 100%);
+            padding: 20px;
+            border-bottom: 2px solid #00ffcc;
+            box-shadow: 0 4px 20px rgba(0, 255, 204, 0.3);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 2rem;
+            color: #00ffcc;
+            text-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
+        }
+
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(0, 255, 204, 0.1);
+            padding: 10px 20px;
+            border-radius: 20px;
+            border: 1px solid #00ffcc;
+        }
+
+        .pulse-dot {
+            width: 12px;
+            height: 12px;
+            background: #00ff00;
+            border-radius: 50%;
+            animation: pulse 1.5s ease-in-out infinite;
+            box-shadow: 0 0 10px #00ff00;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.2); }
+        }
+
+        .main-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .generation-banner {
+            background: linear-gradient(90deg, #6366f1, #8b5cf6, #d946ef);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(99, 102, 241, 0.4);
+        }
+
+        .generation-number {
+            font-size: 3rem;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .generation-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        .chart-section {
+            background: #151937;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid #2d3561;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: #00ffcc;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-icon {
+            font-size: 1.8rem;
+        }
+
+        #fitness-chart {
+            width: 100%;
+            height: 300px;
+            background: #0a0e1f;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .population-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .genome-card {
+            background: linear-gradient(135deg, #1e2139 0%, #2a2f4a 100%);
+            border-radius: 12px;
+            padding: 15px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .genome-card.elite {
+            border-color: #ffd700;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+        }
+
+        .genome-card.avg {
+            border-color: #4a9eff;
+        }
+
+        .genome-card.low {
+            border-color: #666;
+            opacity: 0.7;
+        }
+
+        .genome-card.dead {
+            background: linear-gradient(135deg, #2a1a1a 0%, #3a2020 100%);
+            border-color: #ff4444;
+            opacity: 0.5;
+        }
+
+        .genome-card.playing {
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.7);
+            transform: translateY(-5px) scale(1.05);
+            border-color: #00ffff;
+            z-index: 10;
+        }
+
+        .genome-badge {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(255, 215, 0, 0.9);
+            color: #000;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+
+        .genome-badge.avg-badge {
+            background: rgba(74, 158, 255, 0.9);
+            color: white;
+        }
+
+        .genome-badge.new-badge {
+            background: rgba(147, 51, 234, 0.9);
+            color: white;
+        }
+
+        .genome-id {
+            font-size: 0.9rem;
+            color: #00ffcc;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .mini-board {
+            width: 100%;
+            height: 120px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .fitness-bar-container {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .fitness-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #34d399);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .genome-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .control-panel {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.6);
+        }
+
+        .control-btn.danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+
+        .speed-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .speed-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid #00ffcc;
+            color: #00ffcc;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .speed-btn.active {
+            background: #00ffcc;
+            color: #0a0e27;
+        }
+
+        .diversity-indicator {
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(255, 193, 7, 0.1);
+            border-left: 4px solid #ffc107;
+            border-radius: 5px;
+        }
+
+        .diversity-bar {
+            width: 100%;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .diversity-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ffc107, #ff9800);
+            transition: width 0.5s ease;
+        }
+
+        .annotation-marker {
+            position: absolute;
+            width: 3px;
+            height: 20px;
+            background: #ffd700;
+            cursor: pointer;
+        }
+
+        .annotation-label {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            color: #ffd700;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .annotation-marker:hover .annotation-label {
+            opacity: 1;
+        }
+
+        .callout {
+            background: rgba(99, 102, 241, 0.2);
+            border-left: 4px solid #6366f1;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+            font-size: 0.95rem;
+        }
+
+        .callout.success {
+            background: rgba(16, 185, 129, 0.2);
+            border-left-color: #10b981;
+        }
+
+        .callout.warning {
+            background: rgba(245, 158, 11, 0.2);
+            border-left-color: #f59e0b;
+        }
+
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-header">
+        <div class="header-content">
+            <h1>🧬 GA Evolution Dashboard</h1>
+            <div class="live-indicator">
+                <div class="pulse-dot"></div>
+                <span>LIVE</span>
+                <span id="update-time">Just now</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="generation-banner">
+            <div class="generation-number" id="current-generation">Generation 0</div>
+            <div class="generation-stats">
+                <div class="stat-card">
+                    <div class="stat-label">Best Fitness</div>
+                    <div class="stat-value" id="best-fitness">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Average Fitness</div>
+                    <div class="stat-value" id="avg-fitness">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Population Diversity</div>
+                    <div class="stat-value" id="diversity-value">0.00</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Improvement</div>
+                    <div class="stat-value" id="improvement">+0%</div>
+                </div>
+            </div>
+            <div id="evolution-callout" class="callout" style="display: none;"></div>
+        </div>
+
+        <div class="control-panel">
+            <button class="control-btn" onclick="dashboard.startTraining()">Start Training</button>
+            <button class="control-btn" onclick="dashboard.pauseTraining()">Pause</button>
+            <button class="control-btn danger" onclick="dashboard.resetGA()">Reset GA</button>
+            <div class="speed-controls">
+                <span style="color: #00ffcc;">Speed:</span>
+                <button class="speed-btn active" onclick="dashboard.setSpeed(1)">1×</button>
+                <button class="speed-btn" onclick="dashboard.setSpeed(5)">5×</button>
+                <button class="speed-btn" onclick="dashboard.setSpeed(0)">MAX</button>
+            </div>
+        </div>
+
+        <div class="chart-section">
+            <div class="section-title">
+                <span class="section-icon">📈</span>
+                <span>Fitness Evolution Over Time</span>
+            </div>
+            <canvas id="fitness-chart"></canvas>
+            <div class="diversity-indicator">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                    <span><strong>Exploration Mode:</strong> <span id="exploration-mode">BALANCED</span></span>
+                    <span>Mutation: <span id="mutation-rate">0.1</span></span>
+                </div>
+                <div class="diversity-bar">
+                    <div class="diversity-fill" id="diversity-bar" style="width: 50%"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-section">
+            <div class="section-title">
+                <span class="section-icon">🧬</span>
+                <span>Current Population</span>
+                <span style="margin-left: auto; font-size: 0.9rem; color: rgba(255, 255, 255, 0.6);">
+                    <span id="population-size">0</span> genomes
+                </span>
+            </div>
+            <div class="population-grid" id="population-grid">
+                <!-- Genome cards will be dynamically inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class GADashboard {
+            constructor() {
+                this.updateInterval = 500; // ms
+                this.speedMultiplier = 1;
+                this.fitnessHistory = [];
+                this.canvas = document.getElementById('fitness-chart');
+                this.ctx = this.canvas.getContext('2d');
+                this.setupCanvas();
+                this.startUpdates();
+            }
+
+            setupCanvas() {
+                const rect = this.canvas.parentElement.getBoundingClientRect();
+                this.canvas.width = rect.width;
+                this.canvas.height = 300;
+            }
+
+            startUpdates() {
+                setInterval(() => this.update(), this.updateInterval);
+                window.addEventListener('resize', () => this.setupCanvas());
+            }
+
+            update() {
+                const state = this.loadGAState();
+                if (!state) {
+                    this.showNoDataMessage();
+                    return;
+                }
+
+                this.updateGenerationBanner(state);
+                this.updateFitnessChart(state);
+                this.updatePopulationGrid(state);
+                this.updateDiversityIndicator(state);
+                this.updateCallouts(state);
+                this.updateTimestamp();
+            }
+
+            loadGAState() {
+                // Try to load from localStorage
+                const stored = localStorage.getItem('tetris_ai_weights_v2_population');
+                if (stored) {
+                    try {
+                        return JSON.parse(stored);
+                    } catch (e) {
+                        console.error('Failed to parse GA state:', e);
+                    }
+                }
+
+                // Generate demo data if no real data exists
+                return this.generateDemoData();
+            }
+
+            generateDemoData() {
+                const generation = Math.floor(Date.now() / 10000) % 200;
+                const baselineFitness = 1000 + generation * 50;
+                const improvementFactor = Math.log(generation + 1) * 100;
+
+                const population = [];
+                for (let i = 0; i < 20; i++) {
+                    const variance = (Math.random() - 0.5) * 500;
+                    const fitness = Math.max(0, baselineFitness + improvementFactor + variance);
+                    population.push({
+                        id: `genome-${i}`,
+                        fitness: fitness,
+                        weights: this.generateRandomWeights(),
+                        evaluated: Math.random() > 0.3,
+                        isElite: i < 3
+                    });
+                }
+
+                population.sort((a, b) => b.fitness - a.fitness);
+
+                const history = [];
+                for (let g = 0; g <= generation; g++) {
+                    const genBaseline = 1000 + g * 50;
+                    const genImprovement = Math.log(g + 1) * 100;
+                    history.push({
+                        generation: g,
+                        bestFitness: genBaseline + genImprovement + Math.random() * 200,
+                        avgFitness: genBaseline + genImprovement * 0.6 + Math.random() * 100,
+                        diversity: 0.3 + Math.random() * 0.4
+                    });
+                }
+
+                return {
+                    generation,
+                    population,
+                    history,
+                    config: {
+                        populationSize: 20,
+                        mutationRate: 0.1 + Math.random() * 0.2,
+                        explorationBalance: Math.random()
+                    }
+                };
+            }
+
+            generateRandomWeights() {
+                return {
+                    height: Math.random() * 2 - 1,
+                    lines: Math.random() * 2 - 1,
+                    holes: Math.random() * 2 - 1,
+                    bumpiness: Math.random() * 2 - 1
+                };
+            }
+
+            updateGenerationBanner(state) {
+                document.getElementById('current-generation').textContent = `Generation ${state.generation}`;
+
+                const evaluated = state.population.filter(g => g.evaluated);
+                if (evaluated.length > 0) {
+                    const fitnesses = evaluated.map(g => g.fitness);
+                    const bestFitness = Math.max(...fitnesses);
+                    const avgFitness = fitnesses.reduce((a, b) => a + b, 0) / fitnesses.length;
+
+                    document.getElementById('best-fitness').textContent = Math.round(bestFitness).toLocaleString();
+                    document.getElementById('avg-fitness').textContent = Math.round(avgFitness).toLocaleString();
+
+                    // Calculate improvement
+                    if (state.history && state.history.length > 20) {
+                        const recent = state.history.slice(-20);
+                        const oldAvg = recent.slice(0, 10).reduce((sum, h) => sum + h.avgFitness, 0) / 10;
+                        const newAvg = recent.slice(-10).reduce((sum, h) => sum + h.avgFitness, 0) / 10;
+                        const improvement = ((newAvg - oldAvg) / oldAvg * 100).toFixed(1);
+                        const improvementEl = document.getElementById('improvement');
+                        improvementEl.textContent = `${improvement > 0 ? '+' : ''}${improvement}%`;
+                        improvementEl.style.color = improvement > 0 ? '#10b981' : '#ef4444';
+                    }
+                }
+
+                // Calculate diversity
+                const diversity = this.calculateDiversity(state.population);
+                document.getElementById('diversity-value').textContent = diversity.toFixed(2);
+            }
+
+            calculateDiversity(population) {
+                if (population.length < 2) return 0;
+
+                let totalDistance = 0;
+                let comparisons = 0;
+
+                for (let i = 0; i < population.length; i++) {
+                    for (let j = i + 1; j < population.length; j++) {
+                        const dist = this.weightDistance(population[i].weights, population[j].weights);
+                        totalDistance += dist;
+                        comparisons++;
+                    }
+                }
+
+                return comparisons > 0 ? totalDistance / comparisons : 0;
+            }
+
+            weightDistance(w1, w2) {
+                const keys = Object.keys(w1);
+                let sum = 0;
+                for (const key of keys) {
+                    sum += Math.pow(w1[key] - w2[key], 2);
+                }
+                return Math.sqrt(sum);
+            }
+
+            updateFitnessChart(state) {
+                if (!state.history || state.history.length === 0) return;
+
+                const history = state.history.slice(-100); // Last 100 generations
+                const width = this.canvas.width;
+                const height = this.canvas.height;
+                const padding = 40;
+
+                // Clear canvas
+                this.ctx.fillStyle = '#0a0e1f';
+                this.ctx.fillRect(0, 0, width, height);
+
+                // Find min/max for scaling
+                const allFitnesses = history.flatMap(h => [h.bestFitness, h.avgFitness]);
+                const minFitness = Math.min(...allFitnesses);
+                const maxFitness = Math.max(...allFitnesses);
+                const range = maxFitness - minFitness;
+
+                const xScale = (width - 2 * padding) / (history.length - 1);
+                const yScale = (height - 2 * padding) / range;
+
+                // Draw grid
+                this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+                this.ctx.lineWidth = 1;
+                for (let i = 0; i < 5; i++) {
+                    const y = padding + (height - 2 * padding) * i / 4;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(padding, y);
+                    this.ctx.lineTo(width - padding, y);
+                    this.ctx.stroke();
+                }
+
+                // Draw best fitness line
+                this.ctx.strokeStyle = '#10b981';
+                this.ctx.lineWidth = 3;
+                this.ctx.beginPath();
+                history.forEach((h, i) => {
+                    const x = padding + i * xScale;
+                    const y = height - padding - (h.bestFitness - minFitness) * yScale;
+                    if (i === 0) this.ctx.moveTo(x, y);
+                    else this.ctx.lineTo(x, y);
+                });
+                this.ctx.stroke();
+
+                // Draw average fitness line
+                this.ctx.strokeStyle = '#6366f1';
+                this.ctx.lineWidth = 2;
+                this.ctx.beginPath();
+                history.forEach((h, i) => {
+                    const x = padding + i * xScale;
+                    const y = height - padding - (h.avgFitness - minFitness) * yScale;
+                    if (i === 0) this.ctx.moveTo(x, y);
+                    else this.ctx.lineTo(x, y);
+                });
+                this.ctx.stroke();
+
+                // Draw diversity overlay (background gradient)
+                const gradient = this.ctx.createLinearGradient(0, 0, 0, height);
+                history.forEach((h, i) => {
+                    const diversityAlpha = h.diversity || 0;
+                    const position = i / (history.length - 1);
+                    gradient.addColorStop(position, `rgba(255, 193, 7, ${diversityAlpha * 0.2})`);
+                });
+                this.ctx.fillStyle = gradient;
+                this.ctx.fillRect(padding, padding, width - 2 * padding, height - 2 * padding);
+
+                // Draw labels
+                this.ctx.fillStyle = '#e0e0e0';
+                this.ctx.font = '12px Segoe UI';
+                this.ctx.fillText(`Gen ${history[0].generation}`, padding, height - 5);
+                this.ctx.fillText(`Gen ${history[history.length - 1].generation}`, width - padding - 40, height - 5);
+                this.ctx.fillText(Math.round(maxFitness).toLocaleString(), 5, padding + 5);
+                this.ctx.fillText(Math.round(minFitness).toLocaleString(), 5, height - padding);
+
+                // Legend
+                this.ctx.fillStyle = '#10b981';
+                this.ctx.fillRect(width - 150, 20, 20, 3);
+                this.ctx.fillStyle = '#e0e0e0';
+                this.ctx.fillText('Best', width - 125, 25);
+
+                this.ctx.fillStyle = '#6366f1';
+                this.ctx.fillRect(width - 150, 35, 20, 2);
+                this.ctx.fillStyle = '#e0e0e0';
+                this.ctx.fillText('Average', width - 125, 40);
+            }
+
+            updatePopulationGrid(state) {
+                const grid = document.getElementById('population-grid');
+                document.getElementById('population-size').textContent = state.population.length;
+
+                // Sort by fitness
+                const sorted = [...state.population].sort((a, b) => b.fitness - a.fitness);
+                const maxFitness = sorted[0]?.fitness || 1;
+
+                // Clear and rebuild
+                grid.innerHTML = '';
+
+                sorted.forEach((genome, index) => {
+                    const card = this.createGenomeCard(genome, index, maxFitness, sorted.length);
+                    grid.appendChild(card);
+                });
+            }
+
+            createGenomeCard(genome, index, maxFitness, totalCount) {
+                const card = document.createElement('div');
+                card.className = 'genome-card';
+
+                // Determine class based on ranking
+                const percentile = index / totalCount;
+                if (percentile < 0.15) {
+                    card.classList.add('elite');
+                } else if (percentile < 0.5) {
+                    card.classList.add('avg');
+                } else {
+                    card.classList.add('low');
+                }
+
+                if (!genome.evaluated) {
+                    card.classList.add('dead');
+                }
+
+                // Badge
+                let badge = '';
+                if (genome.isElite || percentile < 0.15) {
+                    badge = '<div class="genome-badge">ELITE</div>';
+                } else if (percentile < 0.5) {
+                    badge = '<div class="genome-badge avg-badge">AVG</div>';
+                } else if (index >= totalCount - 5) {
+                    badge = '<div class="genome-badge new-badge">NEW</div>';
+                }
+
+                const fitnessPercent = genome.evaluated ? (genome.fitness / maxFitness * 100) : 0;
+
+                card.innerHTML = `
+                    ${badge}
+                    <div class="genome-id">${genome.id || `Genome #${index + 1}`}</div>
+                    <div class="mini-board">
+                        <!-- Mini board visualization would go here -->
+                        <canvas width="160" height="100" style="width: 100%; height: 100%;"></canvas>
+                    </div>
+                    <div class="fitness-bar-container">
+                        <div class="fitness-bar" style="width: ${fitnessPercent}%"></div>
+                    </div>
+                    <div class="genome-stats">
+                        <span>Fitness: ${Math.round(genome.fitness || 0)}</span>
+                        <span>${genome.evaluated ? '✓' : '⏳'}</span>
+                    </div>
+                `;
+
+                // Draw simple mini visualization
+                const canvas = card.querySelector('canvas');
+                const ctx = canvas.getContext('2d');
+                this.drawMiniVisualization(ctx, genome);
+
+                return card;
+            }
+
+            drawMiniVisualization(ctx, genome) {
+                const width = 160;
+                const height = 100;
+
+                // Background
+                ctx.fillStyle = '#0a0e1f';
+                ctx.fillRect(0, 0, width, height);
+
+                // Draw simple bars representing weights
+                const weights = genome.weights || {};
+                const keys = Object.keys(weights);
+                const barWidth = width / keys.length;
+
+                keys.forEach((key, i) => {
+                    const value = weights[key];
+                    const normalizedValue = (value + 1) / 2; // Assume weights are -1 to 1
+                    const barHeight = normalizedValue * height;
+
+                    const hue = i * (360 / keys.length);
+                    ctx.fillStyle = `hsl(${hue}, 70%, 60%)`;
+                    ctx.fillRect(i * barWidth, height - barHeight, barWidth - 2, barHeight);
+                });
+
+                // Overlay status
+                if (!genome.evaluated) {
+                    ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
+                    ctx.fillRect(0, 0, width, height);
+                }
+            }
+
+            updateDiversityIndicator(state) {
+                const diversity = this.calculateDiversity(state.population);
+                const diversityPercent = Math.min(diversity * 100, 100);
+
+                document.getElementById('diversity-bar').style.width = `${diversityPercent}%`;
+
+                const mutationRate = state.config?.mutationRate || 0.1;
+                document.getElementById('mutation-rate').textContent = mutationRate.toFixed(2);
+
+                const explorationBalance = state.config?.explorationBalance || 0.5;
+                let mode = 'BALANCED';
+                if (explorationBalance > 0.7) mode = 'HIGH';
+                else if (explorationBalance < 0.3) mode = 'LOW';
+                document.getElementById('exploration-mode').textContent = mode;
+            }
+
+            updateCallouts(state) {
+                const callout = document.getElementById('evolution-callout');
+
+                if (state.history && state.history.length > 20) {
+                    const recent = state.history.slice(-20);
+                    const oldBest = recent[0].bestFitness;
+                    const newBest = recent[recent.length - 1].bestFitness;
+                    const improvement = ((newBest - oldBest) / oldBest * 100);
+
+                    if (improvement > 10) {
+                        callout.className = 'callout success';
+                        callout.textContent = `🎉 Population improving rapidly! +${improvement.toFixed(1)}% best fitness over last 20 generations`;
+                        callout.style.display = 'block';
+                    } else if (improvement < 2 && state.generation > 30) {
+                        callout.className = 'callout warning';
+                        callout.textContent = `⚠️ Evolution plateauing. Consider increasing mutation rate or introducing new diversity.`;
+                        callout.style.display = 'block';
+                    } else {
+                        callout.style.display = 'none';
+                    }
+                } else {
+                    callout.style.display = 'none';
+                }
+            }
+
+            updateTimestamp() {
+                const now = new Date();
+                const timeStr = now.toLocaleTimeString();
+                document.getElementById('update-time').textContent = timeStr;
+            }
+
+            showNoDataMessage() {
+                const grid = document.getElementById('population-grid');
+                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: rgba(255,255,255,0.5);">No GA data available. Start training to see evolution in real-time!</div>';
+            }
+
+            setSpeed(speed) {
+                this.speedMultiplier = speed;
+                document.querySelectorAll('.speed-btn').forEach(btn => btn.classList.remove('active'));
+                event.target.classList.add('active');
+                console.log(`Speed set to ${speed === 0 ? 'MAX' : speed + 'x'}`);
+            }
+
+            startTraining() {
+                console.log('Start training clicked');
+                alert('Training start - integrate with your GA system');
+            }
+
+            pauseTraining() {
+                console.log('Pause training clicked');
+                alert('Training paused - integrate with your GA system');
+            }
+
+            resetGA() {
+                if (confirm('Are you sure you want to reset the GA? This will clear all progress.')) {
+                    localStorage.removeItem('tetris_ai_weights_v2_population');
+                    console.log('GA reset');
+                    location.reload();
+                }
+            }
+        }
+
+        // Initialize dashboard
+        const dashboard = new GADashboard();
+    </script>
+</body>
+</html>
